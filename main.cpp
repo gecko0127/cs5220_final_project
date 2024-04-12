@@ -104,12 +104,10 @@ pair<vector<char>, double> k2_score(vector<vector<int>> &control_contingency_tab
 
 int main(int argc, char *argv[])
 {
-
-    int n_samples = 0;
     int control_size = 0;
     int case_size = 0;
     int snp_size = 0;
-    bool debug = true; // TODO: set to false if do not want to print out debug info
+    bool debug = false; // TODO: set to false if do not want to print out debug info
 
     // read the dataset
     fstream fin;
@@ -124,7 +122,6 @@ int main(int argc, char *argv[])
     vector<vector<char>> case_data;
     while (getline(fin, line, '\n'))
     {
-        // cout << "here" << endl;
         istringstream s(line);
         while (std::getline(s, word, ','))
         {
@@ -132,7 +129,6 @@ int main(int argc, char *argv[])
             {
                 break;
             }
-            // cout << word[0] << endl;
             sample.push_back(word[0]);
         }
         if (sample.size() > 0)
@@ -150,7 +146,6 @@ int main(int argc, char *argv[])
                 case_size++;
             }
             sample.clear();
-            n_samples++;
         }
     }
     fin.close();
@@ -278,7 +273,10 @@ int main(int argc, char *argv[])
                 int snp0_type = idx / 9;
                 int snp1_type = (idx % 9) / 3;
                 int snp2_type = idx % 3;
-                cout << "genotype: " << snp0_type << " " << snp1_type << " " << snp2_type << " : " << control_contingency_table[i][idx] << endl;
+                if (control_contingency_table[i][idx] != 0)
+                {
+                    cout << "genotype: " << snp0_type << " " << snp1_type << " " << snp2_type << " : " << control_contingency_table[i][idx] << endl;
+                }
             }
             cout << endl;
         }
@@ -294,7 +292,10 @@ int main(int argc, char *argv[])
                 int snp0_type = idx / 9;
                 int snp1_type = (idx % 9) / 3;
                 int snp2_type = idx % 3;
-                cout << "genotype: " << snp0_type << " " << snp1_type << " " << snp2_type << " : " << case_contingency_table[i][idx] << endl;
+                if (case_contingency_table[i][idx] != 0)
+                {
+                    cout << "genotype: " << snp0_type << " " << snp1_type << " " << snp2_type << " : " << case_contingency_table[i][idx] << endl;
+                }
             }
             cout << endl;
         }
