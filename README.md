@@ -17,4 +17,5 @@
 
 
 ## Data:
-Hard to find real data; additional request required: https://adni.loni.usc.edu/data-samples/access-data/
+- Hard to find real data; additional request required: https://adni.loni.usc.edu/data-samples/access-data/
+- Use dataset for simulation from https://github.com/rjfnobre/crossarch-episdet/tree/main
