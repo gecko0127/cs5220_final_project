@@ -102,12 +102,12 @@ void k2_score(vector<vector<vector<vector<vector<vector<int>>>>>> &control_conti
             }
         }
     }
+    cout << k2 << endl;
+    cout << final_snp0 << ", " << final_snp1 << ", " << final_snp2 << endl;
 }
 
 int main(int argc, char *argv[])
 {
-
-    int n_samples = 0;
     int control_size = 0;
     int case_size = 0;
     int snp_size = 0;
@@ -145,13 +145,12 @@ int main(int argc, char *argv[])
                 case_size++;
             }
             sample.clear();
-            n_samples++;
         }
     }
     fin.close();
 
     // get the number of snps
-    int snp_size = control_data[0].size();
+    snp_size = control_data[0].size();
 
     // initialize the bit table
     vector<vector<vector<int>>> control_bit_table(snp_size, vector<vector<int>>(3, vector<int>(control_size, 0)));
