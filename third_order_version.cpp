@@ -13,19 +13,22 @@
 using namespace std;
 
 // generate 3 order combinations
-void generate_combinations(vector<vector<char>> &combinations, int snp_size, int num_procs, int rank)
+void generate_combinations(vector<vector<int>> &combinations, int snp_size, int num_procs, int rank)
 {
     int counter = 0;
-    int id = rank;
+    int target = rank;
     for (int i = 0; i < snp_size - 2; i++)
     {
         for (int j = i + 1; j < snp_size - 1; j++)
         {
             for (int k = j + 1; k < snp_size; k++)
             {
-                vector<char> combination = {char(i + '0'), char(j + '0'), char(k + '0')};
-                // vector<char> combination = {char(i + '0'), char(j + '0')};
-                combinations.push_back(combination);
+                if (counter == target)
+                {
+                    combinations.push_back({i, j, k});
+                    target = target + num_procs;
+                }
+                counter++;
             }
         }
     }
@@ -46,13 +49,13 @@ void build_bit_table(vector<vector<char>> &data, vector<vector<vector<bitset<64>
 }
 
 // build the contingency table from the bit table
-void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<char>> &combinations, int size, int snp_size)
+void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
 {
     for (int i = 0; i < combinations.size(); i++)
     {
-        int snp0 = combinations[i][0] - '0';
-        int snp1 = combinations[i][1] - '0';
-        int snp2 = combinations[i][2] - '0';
+        int snp0 = combinations[i][0];
+        int snp1 = combinations[i][1];
+        int snp2 = combinations[i][2];
         for (int idx = 0; idx < 27; idx++)
         {
             int snp0_type = idx / 9;
@@ -69,10 +72,10 @@ void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vect
 }
 
 // calculate k2 score
-pair<vector<char>, double> k2_score(vector<vector<int>> &control_contingency_table, vector<vector<int>> &case_contingency_table, int snp_size, vector<vector<char>> &combinations)
+pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_table, vector<vector<int>> &case_contingency_table, int snp_size, vector<vector<int>> &combinations)
 {
     double k2 = DBL_MAX;
-    vector<char> final_snp;
+    vector<int> final_snp;
     for (int i = 0; i < combinations.size(); i++)
     {
         double score = 0;
@@ -173,7 +176,7 @@ int main(int argc, char *argv[])
         cout << "this is control data: " << endl;
         for (int i = 0; i < control_size; i++)
         {
-            cout << "first sample: ";
+            cout << "sample: ";
             for (int j = 0; j < snp_size; j++)
             {
                 cout << control_data[i][j] << " ";
@@ -186,7 +189,7 @@ int main(int argc, char *argv[])
         cout << "this is case data: " << endl;
         for (int i = 0; i < case_size; i++)
         {
-            cout << "first sample: ";
+            cout << "sample: ";
             for (int j = 0; j < snp_size; j++)
             {
                 cout << case_data[i][j] << " ";
@@ -199,7 +202,7 @@ int main(int argc, char *argv[])
     }
 
     // generate 2 order combinations (each row is a combination)
-    vector<vector<char>> combinations;
+    vector<vector<int>> combinations;
     generate_combinations(combinations, snp_size, num_procs, rank);
 
     if (debug)
@@ -208,9 +211,9 @@ int main(int argc, char *argv[])
              << endl;
         for (auto &combination : combinations)
         {
-            cout << combination[0] << " " << combination[1] << endl;
+            cout << combination[0] << " " << combination[1] << " " << combination[2] << endl;
         }
-        cout << "\nthere are " << combinations.size() << " of 2nd order combinations in total." << endl;
+        cout << "\nthere are " << combinations.size() << " of 3nd order combinations in total." << endl;
 
         cout << "-----------------------------------------------------" << endl;
     }
@@ -315,9 +318,29 @@ int main(int argc, char *argv[])
     }
 
     // calculate the k2 score and return the score and resulting combination
-    pair<vector<char>, double> result = k2_score(control_contingency_table, case_contingency_table, snp_size, combinations);
-    cout << "The lowest K2 score: " << result.second << endl;
-    cout << "The most likely combination of snps: " << result.first[0] << " " << result.first[1] << " " << result.first[2] << endl;
-
+    pair<vector<int>, double> result = k2_score(control_contingency_table, case_contingency_table, snp_size, combinations);
+    double k2_score = result.second;
+    int snp_combination[3] = {result.first[0], result.first[1], result.first[2]};
+    cout << "The lowest K2 score: " << result.second << "; rank: " << rank << endl;
+    cout << "The most likely combination of snps: " << result.first[0] << " " << result.first[1] << " " << result.first[2] << "; rank: " << rank << endl;
+    double final_k2[num_procs] = {0};
+    int final_combinations[num_procs * 3] = {0};
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Gather(&k2_score, 1, MPI_DOUBLE, final_k2, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(&snp_combination, 3, MPI_INT, final_combinations, 3, MPI_INT, 0, MPI_COMM_WORLD);
+    if (rank == 0)
+    {
+        int index = 0;
+        for (int i = 0; i < num_procs; i++)
+        {
+            if (final_k2[i] < final_k2[index])
+            {
+                index = i;
+            }
+        }
+        cout << "The final lowest K2 score: " << final_k2[index] << endl;
+        cout << "The final most likely combination of snps: " << final_combinations[index * 3] << " " << final_combinations[index * 3 + 1] << " " << final_combinations[index * 3 + 2] << endl;
+    }
+    MPI_Finalize();
     return 0;
 }

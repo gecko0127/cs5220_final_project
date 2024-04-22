@@ -48,27 +48,27 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /usr/bin/cmake
+CMAKE_COMMAND = /global/common/software/nersc/pm-2021q4/sw/cmake-3.22.0/bin/cmake
 
 # The command to remove a file.
-RM = /usr/bin/cmake -E rm -f
+RM = /global/common/software/nersc/pm-2021q4/sw/cmake-3.22.0/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/yiwent/cs5220/final_project/cs5220_final_project
+CMAKE_SOURCE_DIR = /global/u2/y/yt634/cs5220_final_project
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/yiwent/cs5220/final_project/cs5220_final_project/build
+CMAKE_BINARY_DIR = /global/u2/y/yt634/cs5220_final_project/build
 
 #=============================================================================
 # Targets provided globally by CMake.
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/global/common/software/nersc/pm-2021q4/sw/cmake-3.22.0/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -78,7 +78,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/global/common/software/nersc/pm-2021q4/sw/cmake-3.22.0/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yiwent/cs5220/final_project/cs5220_final_project/build/CMakeFiles /home/yiwent/cs5220/final_project/cs5220_final_project/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /global/u2/y/yt634/cs5220_final_project/build/CMakeFiles /global/u2/y/yt634/cs5220_final_project/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yiwent/cs5220/final_project/cs5220_final_project/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /global/u2/y/yt634/cs5220_final_project/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -129,29 +129,29 @@ mpi/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/build
 .PHONY : mpi/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+third_order_version.o: third_order_version.cpp.o
+.PHONY : third_order_version.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/main.cpp.o
-.PHONY : main.cpp.o
+third_order_version.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/third_order_version.cpp.o
+.PHONY : third_order_version.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+third_order_version.i: third_order_version.cpp.i
+.PHONY : third_order_version.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/main.cpp.i
-.PHONY : main.cpp.i
+third_order_version.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/third_order_version.cpp.i
+.PHONY : third_order_version.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+third_order_version.s: third_order_version.cpp.s
+.PHONY : third_order_version.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/main.cpp.s
-.PHONY : main.cpp.s
+third_order_version.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/third_order_version.cpp.s
+.PHONY : third_order_version.cpp.s
 
 # Help Target
 help:
@@ -162,9 +162,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... mpi"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... third_order_version.o"
+	@echo "... third_order_version.i"
+	@echo "... third_order_version.s"
 .PHONY : help
 
 

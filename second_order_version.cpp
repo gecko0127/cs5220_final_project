@@ -12,21 +12,22 @@
 
 using namespace std;
 
-// generate 3 order combinations
-void generate_combinations(vector<vector<char>> &combinations, int snp_size, int num_procs, int rank)
+// generate 2 order combinations
+void generate_combinations(vector<vector<int>> &combinations, int snp_size, int num_procs, int rank)
 {
     int counter = 0;
-    int id = rank;
+    int target = rank;
     for (int i = 0; i < snp_size - 2; i++)
     {
         for (int j = i + 1; j < snp_size - 1; j++)
         {
-            for (int k = j + 1; k < snp_size; k++)
+            vector<int> combination = {i, j};
+            if (counter == target)
             {
-                vector<char> combination = {char(i + '0'), char(j + '0'), char(k + '0')};
-                // vector<char> combination = {char(i + '0'), char(j + '0')};
                 combinations.push_back(combination);
+                target = target + num_procs;
             }
+            counter++;
         }
     }
 }
@@ -46,33 +47,61 @@ void build_bit_table(vector<vector<char>> &data, vector<vector<vector<bitset<64>
 }
 
 // build the contingency table from the bit table
-void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<char>> &combinations, int size, int snp_size)
+void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
 {
+
+    vector<vector<bitset<64>>> temp_count;
     for (int i = 0; i < combinations.size(); i++)
     {
-        int snp0 = combinations[i][0] - '0';
-        int snp1 = combinations[i][1] - '0';
-        int snp2 = combinations[i][2] - '0';
-        for (int idx = 0; idx < 27; idx++)
+        int snp0 = combinations[i][0];
+        int snp1 = combinations[i][1];
+        for (int idx = 0; idx < 9; idx++)
         {
             int snp0_type = idx / 9;
             int snp1_type = (idx % 9) / 3;
-            int snp2_type = idx % 3;
-            int count = 0;
+            // int snp2_type = idx % 3;
+            vector<bitset<64>> temp;
             for (int i = 0; i < bit_table[snp0][0].size(); i++)
             {
-                count += (bit_table[snp0][snp0_type][i] & bit_table[snp1][snp1_type][i] & bit_table[snp2][snp2_type][i]).count();
+                temp.push_back(bit_table[snp0][snp0_type][i] & bit_table[snp1][snp1_type][i]);
             }
-            contingency_table[i][idx] = count;
+            temp_count.push_back(temp);
         }
     }
+    vector<vector<int>> new_combinations;
+    for (int i = 0; i < combinations.size(); i++)
+    {
+        int snp0 = combinations[i][0];
+        int snp1 = combinations[i][1];
+        for (int snp2 = snp1 + 1; snp2 < snp_size; snp2++)
+        {
+            vector<int> temp;
+            for (int idx = 0; idx < 9; idx++)
+            {
+                int snp0_type = idx / 9;
+                int snp1_type = (idx % 9) / 3;
+                for (int snp2_type = 0; snp2_type < 3; snp2_type++)
+                {
+                    int count = 0;
+                    for (int j = 0; j < bit_table[snp0][0].size(); j++)
+                    {
+                        count += (temp_count[9 * i + idx][j] & bit_table[snp2][snp2_type][j]).count();
+                    }
+                    temp.push_back(count);
+                }
+            }
+            contingency_table.push_back(temp);
+            new_combinations.push_back({snp0, snp1, snp2});
+        }
+    }
+    combinations = new_combinations;
 }
 
 // calculate k2 score
-pair<vector<char>, double> k2_score(vector<vector<int>> &control_contingency_table, vector<vector<int>> &case_contingency_table, int snp_size, vector<vector<char>> &combinations)
+pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_table, vector<vector<int>> &case_contingency_table, int snp_size, vector<vector<int>> &combinations)
 {
     double k2 = DBL_MAX;
-    vector<char> final_snp;
+    vector<int> final_snp;
     for (int i = 0; i < combinations.size(); i++)
     {
         double score = 0;
@@ -199,7 +228,7 @@ int main(int argc, char *argv[])
     }
 
     // generate 2 order combinations (each row is a combination)
-    vector<vector<char>> combinations;
+    vector<vector<int>> combinations;
     generate_combinations(combinations, snp_size, num_procs, rank);
 
     if (debug)
@@ -264,9 +293,8 @@ int main(int argc, char *argv[])
     }
 
     // initialize the contingency table
-    // (number of combinations) * (number of genotype combinations: 3 * 3 * 3)
-    vector<vector<int>> control_contingency_table(combinations.size(), vector<int>(27, 0));
-    vector<vector<int>> case_contingency_table(combinations.size(), vector<int>(27, 0));
+    vector<vector<int>> control_contingency_table; //(combinations.size(), vector<int>(9, 0));
+    vector<vector<int>> case_contingency_table;    //(combinations.size(), vector<int>(9, 0));
 
     // build the contingency table
     build_contingency_table(control_bit_table, control_contingency_table, combinations, control_size, snp_size);
@@ -315,9 +343,32 @@ int main(int argc, char *argv[])
     }
 
     // calculate the k2 score and return the score and resulting combination
-    pair<vector<char>, double> result = k2_score(control_contingency_table, case_contingency_table, snp_size, combinations);
+    pair<vector<int>, double> result = k2_score(control_contingency_table, case_contingency_table, snp_size, combinations);
+    double k2_score = result.second;
+    int snp_combination = {result.first[0], result.first[1], result.first[2]};
     cout << "The lowest K2 score: " << result.second << endl;
     cout << "The most likely combination of snps: " << result.first[0] << " " << result.first[1] << " " << result.first[2] << endl;
 
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (rank == 0)
+    {
+        double final_k2[num_procs] = {0};
+        int final_combinations[num_procs * 3] = {0};
+        MPI_Gather(&k2_score, 1, MPI_DOUBLE, final_counts, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        MPI_Gather(&snp_combination, 3, MPI_INT, final_combinations, 3, MPI_INT, 0, MPI_COMM_WORLD);
+
+        int index = 0;
+        for (int i = 0; i < num_procs; i++)
+        {
+            if (final_k2[i] < final_k2[index])
+            {
+                index = i;
+            }
+        }
+        cout << "The lowest K2 score: " << final_k2[index] << endl;
+        cout << "The most likely combination of snps: " << final_combinations[i * 3] << " " << final_combinations[i * 3 + 1] << " " << final_combinations[i * 3 + 2] << endl;
+    }
+
+    MPI_Finalize();
     return 0;
 }
