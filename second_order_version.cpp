@@ -64,22 +64,22 @@ void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vect
             int snp0_type = idx / 3;
             int snp1_type = idx % 3;
             vector<bitset<64>> temp; // the and bitset of the first two snps
-            for (int i = 0; i < bit_table[snp0][0].size(); i++)
+            for (int k = 0; k < bit_table[snp0][0].size(); k++)
             {
-                temp.push_back(bit_table[snp0][snp0_type][i] & bit_table[snp1][snp1_type][i]);
+                temp.push_back(bit_table[snp0][snp0_type][k] & bit_table[snp1][snp1_type][k]);
             }
             for (int snp2 = snp1 + 1; snp2 < snp_size; snp2++)
             {
                 for (int snp2_type = 0; snp2_type < 3; snp2_type++)
                 {
                     int count = 0;
-                    for (int j = 0; j < bit_table[snp0][0].size(); j++)
+                    for (int j = 0; j < temp.size(); j++)
                     {
                         count += (temp[j] & bit_table[snp2][snp2_type][j]).count();
                     }
                     contingency_table[snp_combination_index][idx * 3 + snp2_type] = count;
                 }
-                if (idx == 0)
+                if (new_combinations.size() == 0 || (snp2 > new_combinations.back()[2]) || (snp0 != new_combinations.back()[0] || snp1 != new_combinations.back()[1]))
                 {
                     new_combinations.push_back({snp0, snp1, snp2});
                 }
@@ -87,7 +87,7 @@ void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vect
             }
             snp_combination_index = start_combination_index;
         }
-        snp_combination_index = start_combination_index + (snp_size - snp1);
+        snp_combination_index = start_combination_index + (snp_size - snp1 - 1);
     }
     combinations = new_combinations;
 }
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     int control_size = 0;
     int case_size = 0;
     int snp_size = 0;
-    bool debug = true; // TODO: set to false if do not want to print out debug info
+    bool debug = false; // TODO: set to false if do not want to print out debug info
 
     // read the dataset
     fstream fin;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     build_contingency_table(control_bit_table, control_contingency_table, combinations, control_size, snp_size);
     build_contingency_table(case_bit_table, case_contingency_table, combinations, case_size, snp_size);
 
-    if (debug)
+    /*if (debug)
     {
         cout << "This is the fourth stage: building contingency table\n"
              << endl;
@@ -343,7 +343,6 @@ int main(int argc, char *argv[])
     int snp_combination[3] = {result.first[0], result.first[1], result.first[2]};
     cout << "The lowest K2 score: " << result.second << "; rank: " << rank << endl;
     cout << "The most likely combination of snps: " << result.first[0] << " " << result.first[1] << " " << result.first[2] << "; rank: " << rank << endl;
-
     double final_k2[num_procs] = {0};
     int final_combinations[num_procs * 3] = {0};
     MPI_Barrier(MPI_COMM_WORLD);
@@ -351,9 +350,6 @@ int main(int argc, char *argv[])
     MPI_Gather(&snp_combination, 3, MPI_INT, final_combinations, 3, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank == 0)
     {
-        double final_k2[num_procs] = {0};
-        int final_combinations[num_procs * 3] = {0};
-
         int index = 0;
         for (int i = 0; i < num_procs; i++)
         {
@@ -365,7 +361,7 @@ int main(int argc, char *argv[])
         cout << "The final lowest K2 score: " << final_k2[index] << endl;
         cout << "The final most likely combination of snps: " << final_combinations[index * 3] << " " << final_combinations[index * 3 + 1] << " " << final_combinations[index * 3 + 2] << endl;
     }
-
+    */
     MPI_Finalize();
     return 0;
 }

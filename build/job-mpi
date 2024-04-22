@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -N 1
+#SBATCH -N 2
 #SBATCH -C cpu
 #SBATCH -q debug
 #SBATCH -J mpitest
