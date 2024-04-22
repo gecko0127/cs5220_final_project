@@ -27,7 +27,7 @@ if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
             "module swap ${Prg-${CMAKE_C_COMPILER_ID}} PrgEnv-gnu")
 endif ()
 
-add_executable(mpi third_order_version.cpp)
+add_executable(mpi second_order_version.cpp)
 target_link_libraries(mpi PRIVATE MPI::MPI_CXX)
 
 # Copy the job scripts
