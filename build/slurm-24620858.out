@@ -1,7 +1,0 @@
-The lowest K2 score: 3.58352; rank: 0
-The most likely combination of snps: 0 1 2; rank: 0
-The lowest K2 score: 3.58352; rank: 1
-The most likely combination of snps: 0 1 3; rank: 1
-hi
-slurmstepd: error: *** STEP 24620858.0 ON nid004546 CANCELLED AT 2024-04-22T03:12:17 ***
-slurmstepd: error: *** JOB 24620858 ON nid004546 CANCELLED AT 2024-04-22T03:12:17 ***
