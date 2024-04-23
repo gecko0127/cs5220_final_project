@@ -1,5 +1,5 @@
 CMakeFiles/mpi.dir/second_order_version.cpp.o: \
- /global/u2/y/yt634/cs5220_final_project/second_order_version.cpp \
+ /global/homes/y/yt634/cs5220_final_project/second_order_version.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/12/iterator \
  /usr/include/c++/12/x86_64-suse-linux/bits/c++config.h \
  /usr/include/bits/wordsize.h \

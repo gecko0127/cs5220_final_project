@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/mpi.dir/second_order_version.cpp.o"
-  "CMakeFiles/mpi.dir/second_order_version.cpp.o.d"
+  "CMakeFiles/mpi.dir/mpi_main.cpp.o"
+  "CMakeFiles/mpi.dir/mpi_main.cpp.o.d"
   "mpi"
   "mpi.pdb"
 )

@@ -1,4 +1,4 @@
-# Install script for directory: /global/u2/y/yt634/cs5220_final_project
+# Install script for directory: /global/homes/y/yt634/cs5220_final_project
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/global/u2/y/yt634/cs5220_final_project/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/global/homes/y/yt634/cs5220_final_project/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
