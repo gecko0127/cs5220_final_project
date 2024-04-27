@@ -1,0 +1,3 @@
+/global/u2/e/ey273/CLASS-SP24/final/cs5220_final_project/build/CMakeFiles/openmp.dir
+/global/u2/e/ey273/CLASS-SP24/final/cs5220_final_project/build/CMakeFiles/edit_cache.dir
+/global/u2/e/ey273/CLASS-SP24/final/cs5220_final_project/build/CMakeFiles/rebuild_cache.dir
