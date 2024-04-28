@@ -129,29 +129,29 @@ mpi/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/build
 .PHONY : mpi/fast
 
-mpi_main.o: mpi_main.cpp.o
-.PHONY : mpi_main.o
+mpi_openmp_main.o: mpi_openmp_main.cpp.o
+.PHONY : mpi_openmp_main.o
 
 # target to build an object file
-mpi_main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.o
-.PHONY : mpi_main.cpp.o
+mpi_openmp_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o
+.PHONY : mpi_openmp_main.cpp.o
 
-mpi_main.i: mpi_main.cpp.i
-.PHONY : mpi_main.i
+mpi_openmp_main.i: mpi_openmp_main.cpp.i
+.PHONY : mpi_openmp_main.i
 
 # target to preprocess a source file
-mpi_main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.i
-.PHONY : mpi_main.cpp.i
+mpi_openmp_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_openmp_main.cpp.i
+.PHONY : mpi_openmp_main.cpp.i
 
-mpi_main.s: mpi_main.cpp.s
-.PHONY : mpi_main.s
+mpi_openmp_main.s: mpi_openmp_main.cpp.s
+.PHONY : mpi_openmp_main.s
 
 # target to generate assembly for a file
-mpi_main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.s
-.PHONY : mpi_main.cpp.s
+mpi_openmp_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_openmp_main.cpp.s
+.PHONY : mpi_openmp_main.cpp.s
 
 # Help Target
 help:
@@ -162,9 +162,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... mpi"
-	@echo "... mpi_main.o"
-	@echo "... mpi_main.i"
-	@echo "... mpi_main.s"
+	@echo "... mpi_openmp_main.o"
+	@echo "... mpi_openmp_main.i"
+	@echo "... mpi_openmp_main.s"
 .PHONY : help
 
 

@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = 
 
-CXX_FLAGS = -O3 -DNDEBUG -std=gnu++11
+CXX_FLAGS = -O3 -DNDEBUG -fopenmp -std=gnu++11
 

@@ -9,8 +9,8 @@
 #modules
 # module load openmpi
 #OpenMP settings:
-#export OMP_NUM_THREADS=2
+export OMP_NUM_THREADS=4
 
 
 #run the application:
-srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/512SNPs_2048samples.csv 3
+srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/64SNPs_256samples.csv 3

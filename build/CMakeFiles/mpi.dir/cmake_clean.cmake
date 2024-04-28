@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/mpi.dir/mpi_main.cpp.o"
-  "CMakeFiles/mpi.dir/mpi_main.cpp.o.d"
+  "CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o"
+  "CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o.d"
   "mpi"
   "mpi.pdb"
 )

@@ -138,10 +138,11 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
     double k2 = DBL_MAX;
     vector<int> final_snp;
     vector<double> scores(combinations.size(), 0);
-
-#pragma omp parallel for collapse(2)
+    // int best = 0;
+#pragma omp parallel for
     for (int i = 0; i < combinations.size(); i++)
     {
+        // double score = 0;
         for (int idx = 0; idx < 27; idx++)
         {
             int case_count = case_contingency_table[i][idx];
@@ -160,11 +161,10 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
             {
                 second_log += log(d);
             }
-#pragma omp atomic
             scores[i] += (first_log - second_log);
         }
     }
-    for (int i = 0; i < combinations.size(); i++)
+    for (int i = 0; i < scores.size(); i++)
     {
         if (scores[i] < k2)
         {
@@ -172,7 +172,6 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
             final_snp = combinations[i];
         }
     }
-
     return {final_snp, k2};
 }
 

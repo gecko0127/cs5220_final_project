@@ -29,8 +29,10 @@ if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 
 #add_executable(mpi mpi_main.cpp)
+#target_link_libraries(mpi PRIVATE MPI::MPI_CXX)
 add_executable(mpi mpi_openmp_main.cpp)
-target_link_libraries(mpi PRIVATE MPI::MPI_CXX PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(mpi PUBLIC OpenMP::OpenMP_CXX)
+target_link_libraries(mpi PUBLIC MPI::MPI_CXX)
 
 # Copy the job scripts
 #configure_file(job-mpi job-mpi COPYONLY)
