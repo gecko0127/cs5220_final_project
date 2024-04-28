@@ -3,14 +3,14 @@
 #SBATCH -C cpu
 #SBATCH -q debug
 #SBATCH -J mpitest
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks-per-node=16
 #SBATCH -t 00:30:00
 
 #modules
 # module load openmpi
 #OpenMP settings:
-export OMP_NUM_THREADS=2
+#export OMP_NUM_THREADS=2
 
 
 #run the application:
-srun ./mpi /pscratch/sd/y/yt634/small.csv 2
+srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/512SNPs_2048samples.csv 3
