@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 find_package(MPI REQUIRED)
+find_package(OpenMP REQUIRED)
 
 # netID
 #set(NET_ID xxx CACHE STRING "Your netID")
@@ -27,8 +28,9 @@ if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
             "module swap ${Prg-${CMAKE_C_COMPILER_ID}} PrgEnv-gnu")
 endif ()
 
-add_executable(mpi main.cpp)
-target_link_libraries(mpi PRIVATE MPI::MPI_CXX)
+#add_executable(mpi mpi_main.cpp)
+add_executable(mpi mpi_openmp_main.cpp)
+target_link_libraries(mpi PRIVATE MPI::MPI_CXX PRIVATE OpenMP::OpenMP_CXX)
 
 # Copy the job scripts
 #configure_file(job-mpi job-mpi COPYONLY)

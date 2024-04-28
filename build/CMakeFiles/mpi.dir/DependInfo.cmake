@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/yiwent/cs5220/final_project/cs5220_final_project/main.cpp" "CMakeFiles/mpi.dir/main.cpp.o" "gcc" "CMakeFiles/mpi.dir/main.cpp.o.d"
+  "/global/homes/y/yt634/cs5220_final_project/mpi_openmp_main.cpp" "CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o" "gcc" "CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o.d"
   )
 
 # Targets to which this target links.
