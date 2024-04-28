@@ -8,6 +8,7 @@
 #include <bitset>
 #include <bits/stdc++.h>
 #include <cmath>
+#include <mpi.h>
 
 using namespace std;
 
@@ -102,11 +103,18 @@ pair<vector<char>, double> k2_score(vector<vector<int>> &control_contingency_tab
     return {final_snp, k2};
 }
 
+// argv[1]: dataset file; argv[2]: control size; argv[3]: case size; argv[4]: snp size
 int main(int argc, char *argv[])
 {
-    int control_size = 0;
-    int case_size = 0;
-    int snp_size = 0;
+    int num_procs, rank; // number of processes and rank of each process
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // the argv comes from the argv passed to the main function
+    int control_size = stoi(argv[2]);
+    int case_size = stoi(argv[3]);
+    int snp_size = stoi(argv[4]);
     bool debug = false; // TODO: set to false if do not want to print out debug info
 
     // read the dataset
