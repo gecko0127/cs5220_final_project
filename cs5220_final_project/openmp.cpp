@@ -16,7 +16,6 @@ using namespace std;
 // generate 3 order combinations
 void generate_3rd_combinations(vector<vector<int>> &combinations, int snp_size)
 {
-    int index = 0;
     #pragma omp single
     for (int i = 0; i < snp_size - 2; i++)
     {   
@@ -24,8 +23,7 @@ void generate_3rd_combinations(vector<vector<int>> &combinations, int snp_size)
         {
             for (int k = j + 1; k < snp_size; k++)
             {
-                    combinations[index]={i, j, k};
-                    index++;
+                    combinations.push_back({i, j, k});
             }
         }
     }
@@ -35,14 +33,14 @@ void generate_3rd_combinations(vector<vector<int>> &combinations, int snp_size)
 void build_3rd_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
 {
     int num_biset = bit_table[0][0].size();
-    #pragma omp parallel for collapse(2)
+    #pragma omp parallel for 
     for (int i = 0; i < combinations.size(); i++)
     {
+        int snp0 = combinations[i][0];
+        int snp1 = combinations[i][1];
+        int snp2 = combinations[i][2];
         for (int idx = 0; idx < 27; idx++)
         {
-            int snp0 = combinations[i][0];
-            int snp1 = combinations[i][1];
-            int snp2 = combinations[i][2];
             int snp0_type = idx / 9;
             int snp1_type = (idx % 9) / 3;
             int snp2_type = idx % 3;
@@ -76,10 +74,11 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
 {
     double k2 = DBL_MAX;
     vector<int> final_snp;
+    vector<double> scores(combinations.size(), 0);
     #pragma omp parallel for
     for (int i = 0; i < combinations.size(); i++)
     {
-        double score = 0;
+        // double score = 0;
         for (int idx = 0; idx < 27; idx++)
         {
             int case_count = case_contingency_table[i][idx];
@@ -98,23 +97,25 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
             {
                 second_log += log(d);
             }
-            score += (first_log - second_log);
+            scores[i] += (first_log - second_log);
         }
-
-        if (score < k2)
+    }
+    for (int i = 0; i < scores.size(); i++)
+    {
+        if (scores[i] < k2)
         {
-            k2 = score;
+            k2 = scores[i];
             final_snp = combinations[i];
         }
     }
     return {final_snp, k2};
 }
 
-// the expected argument: argv[1]: file name; 
+// the expected argument: argv[1]: file name;   
 int main(int argc, char *argv[])
 {
 
-    omp_set_num_threads(64);
+    omp_set_num_threads(1);
 
     auto start_time = std::chrono::steady_clock::now();
     int control_size = 0; // the number of control sample
@@ -201,7 +202,6 @@ int main(int argc, char *argv[])
 
     // generate 3 order combinations (each row is a combination)
     vector<vector<int>> combinations;
-    combinations.resize((snp_size - 2) * (snp_size - 1) * (snp_size) / 6, vector<int>(3));
     generate_3rd_combinations(combinations, snp_size);
 
     if (debug)
