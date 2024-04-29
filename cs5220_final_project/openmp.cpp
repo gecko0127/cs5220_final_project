@@ -17,7 +17,7 @@ using namespace std;
 void generate_3rd_combinations(vector<vector<int>> &combinations, int snp_size)
 {
     int index = 0;
-    #pragma omp for
+    #pragma omp single
     for (int i = 0; i < snp_size - 2; i++)
     {   
         for (int j = i + 1; j < snp_size - 1; j++)
@@ -35,7 +35,7 @@ void generate_3rd_combinations(vector<vector<int>> &combinations, int snp_size)
 void build_3rd_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
 {
     int num_biset = bit_table[0][0].size();
-    #pragma omp for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (int i = 0; i < combinations.size(); i++)
     {
         for (int idx = 0; idx < 27; idx++)
@@ -59,7 +59,7 @@ void build_3rd_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, 
 // build the bit table for the dataset
 void build_bit_table(vector<vector<char>> &data, vector<vector<vector<bitset<64>>>> &bit_table, int size, int snp_size)
 {
-    #pragma omp for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (int i = 0; i < snp_size; i++)
     {
         for (int j = 0; j < size; j++)
@@ -76,7 +76,7 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
 {
     double k2 = DBL_MAX;
     vector<int> final_snp;
-    #pragma omp for
+    #pragma omp parallel for
     for (int i = 0; i < combinations.size(); i++)
     {
         double score = 0;
