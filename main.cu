@@ -10,8 +10,12 @@
 #include <cmath>
 #include <cuda.h>
 #include <chrono>
+#include <cuda_runtime.h>
+
+
 
 using namespace std;
+
 
 // generate 3 order combinations
 void generate_combinations(vector<vector<int>>& combinations, int snp_size) {
@@ -25,8 +29,21 @@ void generate_combinations(vector<vector<int>>& combinations, int snp_size) {
     }
 }
 
+void build_bit_table(const vector<vector<char>>& data, vector<uint64_t>& bit_table, int size, int snp_size) {
+    int num_blocks = ceil(size / 64.0);
+    bit_table.resize(snp_size * num_blocks, 0);
+    for (int i = 0; i < snp_size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            int allele = data[j][i] - '0';
+            int index = i * num_blocks + j / 64;
+            int bit_position = j % 64;
+            bit_table[index] |= (1ULL << bit_position);
+        }
+    }
+}
+
 // build the bit table for the dataset
-void build_bit_table(vector<vector<char>> &data, vector<vector<vector<bitset<64>>>> &bit_table, int size, int snp_size)
+void build_bit_table_2(vector<vector<char>> &data, vector<vector<vector<bitset<64>>>> &bit_table, int size, int snp_size)
 {
     for (int i = 0; i < snp_size; i++)
     {
@@ -40,7 +57,7 @@ void build_bit_table(vector<vector<char>> &data, vector<vector<vector<bitset<64>
 }
 
 // build the contingency table from the bit table
-void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
+void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<int> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
 {
     for (int i = 0; i < combinations.size(); i++)
     {   
@@ -58,10 +75,46 @@ void build_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vect
             {
                 count += (bit_table[snp0][snp0_type][j] & bit_table[snp1][snp1_type][j] & bit_table[snp2][snp2_type][j]).count();
             }
-            contingency_table[i][idx] = count;
+            contingency_table[i*27 + idx] = count;
         }
     }
 }
+
+
+__global__ void build_contingency_table_kernel(uint64_t *bit_table, int *contingency_table, int *combinations, int num_combinations, int num_samples, int snp_size) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < num_combinations) {
+        int snp0 = combinations[idx * 3];
+        int snp1 = combinations[idx * 3 + 1];
+        int snp2 = combinations[idx * 3 + 2];
+        for (int i = 0; i < 27; i++) {
+            int snp0_type = i / 9;
+            int snp1_type = (i % 9) / 3;
+            int snp2_type = i % 3;
+            int count = 0;
+            for (int j = 0; j < ceil(num_samples * 1.0 / 64); j++) {
+                int x = j;
+                int index_00 = snp0;
+                int index_01 = snp0_type;
+                int index_02 = x;
+                int index0 = index_00 * 3 * ceil(num_samples * 1.0 / 64) + index_01 * ceil(num_samples * 1.0 / 64) + index_02;
+                int index_10 = snp1;
+                int index_11 = snp1_type;
+                int index_12 = x;
+                int index1 = index_10 * 3 * ceil(num_samples * 1.0 / 64) + index_11 * ceil(num_samples * 1.0 / 64) + index_12;
+                int index_20 = snp2;
+                int index_21 = snp2_type;
+                int index_22 = x;
+                int index2 = index_20 * 3 * ceil(num_samples * 1.0 / 64) + index_21 * ceil(num_samples * 1.0 / 64) + index_22;
+                count += (__popcll(bit_table[index0] & bit_table[index1] & bit_table[index2]));
+            }
+            contingency_table[idx * 27 + i] = count;
+        }
+    }
+}
+
+
+
 
 __global__ void calculate_k2_score(int *d_case_table, int *d_control_table, double *d_scores, int num_combinations)
 {
@@ -72,14 +125,14 @@ __global__ void calculate_k2_score(int *d_case_table, int *d_control_table, doub
             int case_count = d_case_table[idx * 27 + j];
             int control_count = d_control_table[idx * 27 + j];
             double first_log = 0.0, second_log = 0.0;
-            for (int k = 1; k <= case_count + control_count; k++) {
-                first_log += log((double)k);
+            for (int k = 1; k <= case_count + control_count + 1; k++) {
+                first_log += logf((double)k);
             }
             for (int k = 1; k <= case_count; k++) {
-                second_log += log((double)k);
+                second_log += logf((double)k);
             }
             for (int k = 1; k <= control_count; k++) {
-                second_log += log((double)k);
+                second_log += logf((double)k);
             }
             score += (first_log - second_log);
         }
@@ -87,9 +140,9 @@ __global__ void calculate_k2_score(int *d_case_table, int *d_control_table, doub
     }
 }
 
+
 int main(int argc, char *argv[])
 {
-    auto start = std::chrono::high_resolution_clock::now();
     int control_size = 0;
     int case_size = 0;
     int snp_size = 0;
@@ -136,177 +189,95 @@ int main(int argc, char *argv[])
     }
     fin.close();
     // get the number of snps
+    auto start = std::chrono::high_resolution_clock::now();
+
+
     snp_size = control_data[0].size();
 
-    if (debug)
-    {
-        cout << "first stage: read in data\n"
-             << endl;
-
-        cout << "this is control data: " << endl;
-        for (int i = 0; i < control_size; i++)
-        {
-            cout << "first sample: ";
-            for (int j = 0; j < snp_size; j++)
-            {
-                cout << control_data[i][j] << " ";
-            }
-            cout << endl;
-        }
-
-        cout << endl;
-
-        cout << "this is case data: " << endl;
-        for (int i = 0; i < case_size; i++)
-        {
-            cout << "first sample: ";
-            for (int j = 0; j < snp_size; j++)
-            {
-                cout << case_data[i][j] << " ";
-            }
-            cout << endl;
-        }
-
-        cout << "-----------------------------------------------" << endl;
-        cout << endl;
-    }
-
-    // generate 3 order combinations (each row is a combination)
+    
     vector<vector<int>> combinations;
     generate_combinations(combinations, snp_size);
     //print snp_size
     cout << "snp_size: " << snp_size << endl;
 
-    if (debug)
-    {
-        cout << "second stage: generate the number of combinations of snps\n"
-             << endl;
-        for (auto &combination : combinations)
-        {
-            cout << combination[0] << " " << combination[1] << " " << combination[2] << endl;
-        }
-        cout << "\nthere are " << combinations.size() << " of combinations in total." << endl;
 
-        cout << "-----------------------------------------------------" << endl;
-    }
-
-    // initialize the bit table
-    // dimension: snp_size * 3 * (number of 64 multiple in the sample (ceiling))
     vector<vector<vector<bitset<64>>>> control_bit_table(snp_size, vector<vector<bitset<64>>>(3, vector<bitset<64>>(ceil(control_size * 1.0 / 64), 0)));
     vector<vector<vector<bitset<64>>>> case_bit_table(snp_size, vector<vector<bitset<64>>>(3, vector<bitset<64>>(ceil(case_size * 1.0 / 64), 0)));
 
     // build the bit table
-    build_bit_table(control_data, control_bit_table, control_size, snp_size);
-    build_bit_table(case_data, case_bit_table, case_size, snp_size);
+    build_bit_table_2(control_data, control_bit_table, control_size, snp_size);
+    build_bit_table_2(case_data, case_bit_table, case_size, snp_size);
 
-    if (debug)
-    {
-        cout << "This is the third stage: building bit table\n"
-             << endl;
 
-        cout << "This is the control bit table: " << endl;
-        for (int i = 0; i < snp_size; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                cout << "snp: " << i << "; genotype: " << j << " : ";
-                for (auto &c : control_bit_table[i][j])
-                {
-                    cout << c << " ";
-                }
-                cout << endl;
+    vector<uint64_t> flat_control_bit_table;
+    for (int i = 0; i < snp_size; i++) {
+        for (int j = 0; j < 3; j++) {
+            for (int k = 0; k < ceil(control_size * 1.0 / 64); k++) {
+                uint64_t value = control_bit_table[i][j][k].to_ullong();
+                flat_control_bit_table.push_back(value);
             }
         }
-
-        cout << endl;
-
-        cout << "This is the case bit table: " << endl;
-        for (int i = 0; i < snp_size; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                cout << "snp: " << i << "; genotype: " << j << " : ";
-                for (auto &c : case_bit_table[i][j])
-                {
-                    cout << c << " ";
-                }
-                cout << endl;
-            }
-        }
-
-        cout << "-------------------------------------------------------" << endl;
-        cout << endl;
     }
 
-    // initialize the contingency table
-    // (number of combinations) * (number of genotype combinations: 3 * 3 * 3)
-    vector<vector<int>> control_contingency_table(combinations.size(), vector<int>(27, 0));
-    vector<vector<int>> case_contingency_table(combinations.size(), vector<int>(27, 0));
-
-    // build the contingency table
-    build_contingency_table(control_bit_table, control_contingency_table, combinations, control_size, snp_size);
-    build_contingency_table(case_bit_table, case_contingency_table, combinations, case_size, snp_size);
-
-    if (debug)
-    {
-        cout << "This is the fourth stage: building contingency table\n"
-             << endl;
-
-        cout << "This is the control contingency table: " << endl;
-        for (int i = 0; i < combinations.size(); i++)
-        {
-            cout << "snp0: " << combinations[i][0] << "; snp1: " << combinations[i][1] << "; snp2: " << combinations[i][2] << endl;
-            for (int idx = 0; idx < 27; idx++)
-            {
-                int snp0_type = idx / 9;
-                int snp1_type = (idx % 9) / 3;
-                int snp2_type = idx % 3;
-                if (control_contingency_table[i][idx] != 0)
-                {
-                    cout << "genotype: " << snp0_type << " " << snp1_type << " " << snp2_type << " : " << control_contingency_table[i][idx] << endl;
-                }
+    vector<uint64_t> flat_case_bit_table;
+    for (int i = 0; i < snp_size; i++) {
+        for (int j = 0; j < 3; j++) {
+            for (int k = 0; k < ceil(case_size * 1.0 / 64); k++) {
+                uint64_t value = case_bit_table[i][j][k].to_ullong();
+                flat_case_bit_table.push_back(value);
             }
-            cout << endl;
-        }
-
-        cout << endl;
-
-        cout << "This is the case contingency table: " << endl;
-        for (int i = 0; i < combinations.size(); i++)
-        {
-            cout << "snp0: " << combinations[i][0] << "; snp1: " << combinations[i][1] << "; snp2: " << combinations[i][2] << endl;
-            for (int idx = 0; idx < 27; idx++)
-            {
-                int snp0_type = idx / 9;
-                int snp1_type = (idx % 9) / 3;
-                int snp2_type = idx % 3;
-                if (case_contingency_table[i][idx] != 0)
-                {
-                    cout << "genotype: " << snp0_type << " " << snp1_type << " " << snp2_type << " : " << case_contingency_table[i][idx] << endl;
-                }
-            }
-            cout << endl;
         }
     }
+
+
+    uint64_t* d_case_bit_table;
+    size_t size1 = flat_case_bit_table.size() * sizeof(uint64_t);
+    cudaMalloc((void**)&d_case_bit_table, size1);
+    cudaMemcpy(d_case_bit_table, flat_case_bit_table.data(), size1, cudaMemcpyHostToDevice);
+
+    uint64_t* d_control_bit_table;
+    size_t size2 = flat_control_bit_table.size() * sizeof(uint64_t);
+    cudaMalloc((void**)&d_control_bit_table, size2);
+    cudaMemcpy(d_control_bit_table, flat_control_bit_table.data(), size2, cudaMemcpyHostToDevice);
+
+
+    int *d_combinations, *d_contingency_table_control, *d_contingency_table_case;
+    cudaMalloc(&d_contingency_table_control, combinations.size() * 27 * sizeof(int));
+    cudaMalloc(&d_contingency_table_case, combinations.size() * 27 * sizeof(int));
+
+    cudaMalloc(&d_combinations, combinations.size() * 3 * sizeof(int));
+
+    vector<int> flat_combinations;
+    for (int i = 0; i < combinations.size(); i++) {
+        for (int j = 0; j < 3; j++) {
+            int value = combinations[i][j];
+            flat_combinations.push_back(value);
+        }
+    }
+
+    cudaMemcpy(d_combinations, flat_combinations.data(), combinations.size() * 3 * sizeof(int), cudaMemcpyHostToDevice);
+
+    // Define kernel execution parameters
+    int blockSize = 256;
+    int numBlocksComb = (combinations.size() * 27 + blockSize - 1) / blockSize;
+
+    build_contingency_table_kernel<<<numBlocksComb, blockSize>>>(d_control_bit_table, d_contingency_table_control, d_combinations, combinations.size(), control_size, snp_size);
+    build_contingency_table_kernel<<<numBlocksComb, blockSize>>>(d_case_bit_table, d_contingency_table_case, d_combinations, combinations.size(), case_size, snp_size);
+
+    // Free device memory
+    cudaFree(d_case_bit_table);
+    cudaFree(d_control_bit_table);
+    cudaFree(d_combinations);
 
 
     double *d_scores;
-    int *d_case_table, *d_control_table;
-
-    // Allocate memory on the device
     cudaMalloc(&d_scores, combinations.size() * sizeof(double));
-    cudaMalloc(&d_case_table, combinations.size() * 27 * sizeof(int));
-    cudaMalloc(&d_control_table, combinations.size() * 27 * sizeof(int));
 
-    // Copy data to the device
-    cudaMemcpy(d_case_table, &case_contingency_table[0][0], combinations.size() * 27 * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_control_table, &control_contingency_table[0][0], combinations.size() * 27 * sizeof(int), cudaMemcpyHostToDevice);
 
-    int blockSize = 256;
     int numBlocks = (combinations.size() + blockSize - 1) / blockSize;
 
     // Launch the kernel
-    calculate_k2_score<<<numBlocks, blockSize>>>(d_case_table, d_control_table, d_scores, combinations.size());
+    calculate_k2_score<<<numBlocks, blockSize>>>(d_contingency_table_case, d_contingency_table_control, d_scores, combinations.size());
 
     // Copy results back to the host
     vector<double> scores(combinations.size());
@@ -324,8 +295,7 @@ int main(int argc, char *argv[])
 
     // Free device memory
     cudaFree(d_scores);
-    cudaFree(d_case_table);
-    cudaFree(d_control_table);
+
 
     cout << "The lowest K2 score: " << minScore << endl;
     cout << "The most likely combination of snps: " << bestCombination[0] <<','<< bestCombination[1]<<','<< bestCombination[2]<< endl;
@@ -333,6 +303,6 @@ int main(int argc, char *argv[])
     std::cout << std::endl;
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
-    std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+    std::cout << "Elapsed time gpu: " << elapsed.count() << " s\n";
     return 0;
 }
