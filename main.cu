@@ -16,6 +16,43 @@
 
 using namespace std;
 
+void read_in_data(vector<vector<char>> &control_data, vector<vector<char>> &case_data, char *filename)
+{
+    fstream fin;
+    fin.open(filename, ios::in);
+    string line, word;
+    vector<char> sample;
+    while (getline(fin, line, '\n'))
+    {
+        istringstream s(line);
+        while (std::getline(s, word, ','))
+        {
+            if (word == "X")
+            {
+                break;
+            }
+            sample.push_back(word[0]);
+        }
+        if (sample.size() > 0)
+        {
+            if (sample[sample.size() - 1] == '0')
+            {
+                sample.pop_back();
+                control_data.push_back(sample);
+                // control_size++;
+            }
+            else
+            {
+                sample.pop_back();
+                case_data.push_back(sample);
+                // case_size++;
+            }
+            sample.clear();
+        }
+    }
+    fin.close();
+}
+
 // generate 3 order combinations
 void generate_combinations(vector<int> &combinations, int snp_size)
 {
@@ -111,6 +148,7 @@ int main(int argc, char *argv[])
     cudaDeviceGetAttribute(&numSM, cudaDevAttrMultiProcessorCount, devId);
     int device_blks = 32 * numSM;
 
+    // other vairables
     int control_size = 0;
     int case_size = 0;
     int control_64_multiples = 0;
@@ -119,47 +157,15 @@ int main(int argc, char *argv[])
     int num_combinations = 0;
 
     // read the dataset
-    fstream fin;
-    fin.open(argv[1], ios::in);
-    string line, word;
-    vector<char> sample;
-
     // (number of control samples) * snp_size
     vector<vector<char>> control_data;
-    // (number of case samples ) * snp_size
     vector<vector<char>> case_data;
 
-    while (getline(fin, line, '\n'))
-    {
-        istringstream s(line);
-        while (std::getline(s, word, ','))
-        {
-            if (word == "X")
-            {
-                break;
-            }
-            sample.push_back(word[0]);
-        }
-        if (sample.size() > 0)
-        {
-            if (sample[sample.size() - 1] == '0')
-            {
-                sample.pop_back();
-                control_data.push_back(sample);
-                control_size++;
-            }
-            else
-            {
-                sample.pop_back();
-                case_data.push_back(sample);
-                case_size++;
-            }
-            sample.clear();
-        }
-    }
-    fin.close();
-    auto start_time = std::chrono::steady_clock::now();
+    read_in_data(control_data, case_data, argv[1]);
 
+    auto start_time = std::chrono::steady_clock::now();
+    case_size = case_data.size();
+    control_size = control_data.size();
     snp_size = control_data[0].size();                    // get the number of snps
     control_64_multiples = ceil(control_size * 1.0 / 64); // get the number of 64 multiples in control sample
     case_64_multiples = ceil(case_size * 1.0 / 64);       // get the number of 64 multiples in case sample
@@ -178,6 +184,7 @@ int main(int argc, char *argv[])
     build_bit_table(control_data, control_bit_table, control_size, snp_size);
     build_bit_table(case_data, case_bit_table, case_size, snp_size);
 
+    // clean up to save memory
     control_data.clear();
     case_data.clear();
 
@@ -186,6 +193,8 @@ int main(int argc, char *argv[])
     // Common
     int *d_combinations;                        // device copy
     int *local_combinations = &combinations[0]; // local_copy
+
+    // Control
     int control_bit_table_size = snp_size * 3 * control_64_multiples * sizeof(uint64_t);
     uint64_t *d_control_bit_table;                                                 // device copy of control bit table
     uint64_t *long_control_bit_table = (uint64_t *)malloc(control_bit_table_size); // host copy of control bit table
@@ -208,13 +217,15 @@ int main(int argc, char *argv[])
     cudaMalloc((void **)&d_combinations, num_combinations * 3 * sizeof(int));
     cudaMemcpy(d_combinations, local_combinations, num_combinations * 3 * sizeof(int), cudaMemcpyHostToDevice);
     cudaMalloc((void **)&d_control_contingency_table, num_combinations * 27 * sizeof(int));
-    cudaMalloc((void **)&d_control_bit_table, snp_size * 3 * sizeof(uint64_t)); // allocate memory for control bit table device copy
+    cudaMemset(d_control_contingency_table, 0, control_contingency_table_size);
+    cudaMalloc((void **)&d_control_bit_table, snp_size * 3 * sizeof(uint64_t)); // allocate memory for control bit table device copy (only partial)
                                                                                 // cudaMemset(d_control_bit_table, 0, chunk * 27 * sizeof(int));
-    for (int sample_chunk = 0; sample_chunk < control_64_multiples; sample_chunk++)
+    for (int i = 0; i < control_64_multiples; i++)
     {
-        cudaMemcpy(d_control_bit_table, long_control_bit_table + sample_chunk * snp_size * 3 * sizeof(uint64_t), snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_control_bit_table, long_control_bit_table + i * snp_size * 3, snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
         build_contingency_table<<<device_blks, NUM_THREADS>>>(d_control_bit_table, d_control_contingency_table, d_combinations, num_combinations);
     }
+    cudaMemcpy(control_contingency_table, d_control_contingency_table, control_contingency_table_size, cudaMemcpyDeviceToHost);
     cudaFree(d_control_bit_table);
     cudaFree(d_control_contingency_table);
     free(long_control_bit_table);
@@ -238,19 +249,19 @@ int main(int argc, char *argv[])
         }
     }
 
-    // cudaMalloc((void **)&d_case_bit_table, case_bit_table_size);                                    // allocate memory for case bit table device copy
-    // cudaMemcpy(d_case_bit_table, long_case_bit_table, case_bit_table_size, cudaMemcpyHostToDevice); // copy case bit table memory from host to device
     int case_contingency_table_size = num_combinations * 27 * sizeof(int);
     int *d_case_contingency_table; // device copy
     int *case_contingency_table = (int *)malloc(case_contingency_table_size);
 
     cudaMalloc((void **)&d_case_contingency_table, num_combinations * 27 * sizeof(int));
+    cudaMemset(d_case_contingency_table, 0, case_contingency_table_size);
     cudaMalloc((void **)&d_case_bit_table, snp_size * 3 * sizeof(uint64_t));
-    for (int sample_chunk = 0; sample_chunk < case_64_multiples; sample_chunk++)
+    for (int i = 0; i < case_64_multiples; i++)
     {
-        cudaMemcpy(d_case_bit_table, long_case_bit_table + sample_chunk * snp_size * 3 * sizeof(uint64_t), snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_case_bit_table, long_case_bit_table + i * snp_size * 3, snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
         build_contingency_table<<<device_blks, NUM_THREADS>>>(d_case_bit_table, d_case_contingency_table, d_combinations, num_combinations);
     }
+    cudaMemcpy(case_contingency_table, d_case_contingency_table, case_contingency_table_size, cudaMemcpyDeviceToHost);
     cudaFree(d_case_bit_table);
     cudaFree(d_case_contingency_table);
     cudaFree(d_combinations);
@@ -260,8 +271,7 @@ int main(int argc, char *argv[])
     // calculate the k2 score and return the score and resulting combination
     double *scores = (double *)malloc(sizeof(double) * num_combinations); // host copy
     double *d_scores;                                                     // device copy
-    //
-    // cudaMemset(d_scores, 0, sizeof(double) * num_combinations);           // set scores device memory
+
     cudaMalloc((void **)&d_scores, sizeof(double) * num_combinations); // allocate scores device memory
     cudaMalloc((void **)&d_control_contingency_table, num_combinations * 27 * sizeof(int));
     cudaMalloc((void **)&d_case_contingency_table, num_combinations * 27 * sizeof(int));
