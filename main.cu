@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 {
 
     // cuda variable setup
+    auto start_time = std::chrono::steady_clock::now();
     int devId;
     cudaGetDevice(&devId);
     int numSM;
@@ -239,7 +240,10 @@ int main(int argc, char *argv[])
 
     // build the contingency table
     build_contingency_table<<<device_blks, NUM_THREADS>>>(d_control_bit_table, d_control_contingency_table, d_combinations, control_64_multiples, num_combinations);
+    cudaFree(d_control_bit_table);
     build_contingency_table<<<device_blks, NUM_THREADS>>>(d_case_bit_table, d_case_contingency_table, d_combinations, case_64_multiples, num_combinations);
+    cudaFree(d_case_bit_table);
+    cudaFree(d_combinations);
 
     // calculate the k2 score and return the score and resulting combination
     double *scores = (double *)malloc(sizeof(double) * num_combinations); // host copy
@@ -251,10 +255,17 @@ int main(int argc, char *argv[])
     int best_idx = 0;
     for (int i = 0; i < num_combinations; i++)
     {
+        // cout << scores[i] << endl;
         best_idx = (scores[i] < scores[best_idx]) ? i : best_idx;
     }
     cout << "The lowest K2 score: " << scores[best_idx] << endl;
     cout << "The most likely combination of snps: " << combinations[best_idx * 3 + 0] << " " << combinations[best_idx * 3 + 1] << " " << combinations[best_idx * 3 + 2] << endl;
+    auto end_time = std::chrono::steady_clock::now();
+
+    std::chrono::duration<double> diff = end_time - start_time;
+    double seconds = diff.count();
+
+    cout << "Finish in " << seconds << " seconds." << endl;
 
     return 0;
 }
