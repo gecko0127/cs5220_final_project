@@ -9,16 +9,16 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
   "../CMakeLists.txt"
   "CMakeFiles/3.20.4/CMakeCCompiler.cmake"
+  "CMakeFiles/3.20.4/CMakeCUDACompiler.cmake"
   "CMakeFiles/3.20.4/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.20.4/CMakeSystem.cmake"
-  "CMakeFiles/FindMPI/test_mpi.cpp"
   "/usr/share/cmake/Modules/CMakeCInformation.cmake"
+  "/usr/share/cmake/Modules/CMakeCUDAInformation.cmake"
   "/usr/share/cmake/Modules/CMakeCXXInformation.cmake"
   "/usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake"
   "/usr/share/cmake/Modules/CMakeGenericSystem.cmake"
   "/usr/share/cmake/Modules/CMakeInitializeConfigs.cmake"
   "/usr/share/cmake/Modules/CMakeLanguageInformation.cmake"
-  "/usr/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
   "/usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake"
   "/usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
@@ -28,11 +28,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake/Modules/Compiler/GNU-C.cmake"
   "/usr/share/cmake/Modules/Compiler/GNU-CXX.cmake"
   "/usr/share/cmake/Modules/Compiler/GNU.cmake"
-  "/usr/share/cmake/Modules/FindMPI.cmake"
-  "/usr/share/cmake/Modules/FindMPI/test_mpi.c"
-  "/usr/share/cmake/Modules/FindOpenMP.cmake"
-  "/usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
-  "/usr/share/cmake/Modules/FindPackageMessage.cmake"
+  "/usr/share/cmake/Modules/Compiler/NVIDIA-CUDA.cmake"
   "/usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake"
   "/usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake"
   "/usr/share/cmake/Modules/Platform/Linux-GNU.cmake"
@@ -48,12 +44,10 @@ set(CMAKE_MAKEFILE_OUTPUTS
 
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
-  "CMakeFiles/FindMPI/test_mpi.cpp"
-  "CMakeFiles/FindMPI/test_mpi.cpp"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/mpi.dir/DependInfo.cmake"
+  "CMakeFiles/gpu.dir/DependInfo.cmake"
   )

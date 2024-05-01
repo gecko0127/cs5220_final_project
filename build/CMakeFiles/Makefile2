@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /global/homes/y/yt634/cs5220_final_project/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/mpi.dir/all
+all: CMakeFiles/gpu.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/mpi.dir/clean
+clean: CMakeFiles/gpu.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/mpi.dir
+# Target rules for target CMakeFiles/gpu.dir
 
 # All Build rule for target.
-CMakeFiles/mpi.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/global/homes/y/yt634/cs5220_final_project/build/CMakeFiles --progress-num=1,2 "Built target mpi"
-.PHONY : CMakeFiles/mpi.dir/all
+CMakeFiles/gpu.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/global/homes/y/yt634/cs5220_final_project/build/CMakeFiles --progress-num=1,2 "Built target gpu"
+.PHONY : CMakeFiles/gpu.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/mpi.dir/rule: cmake_check_build_system
+CMakeFiles/gpu.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /global/homes/y/yt634/cs5220_final_project/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/mpi.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/gpu.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /global/homes/y/yt634/cs5220_final_project/build/CMakeFiles 0
-.PHONY : CMakeFiles/mpi.dir/rule
+.PHONY : CMakeFiles/gpu.dir/rule
 
 # Convenience name for target.
-mpi: CMakeFiles/mpi.dir/rule
-.PHONY : mpi
+gpu: CMakeFiles/gpu.dir/rule
+.PHONY : gpu
 
 # clean rule for target.
-CMakeFiles/mpi.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/clean
-.PHONY : CMakeFiles/mpi.dir/clean
+CMakeFiles/gpu.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/clean
+.PHONY : CMakeFiles/gpu.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
