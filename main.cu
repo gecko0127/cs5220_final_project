@@ -213,19 +213,26 @@ int main(int argc, char *argv[])
     int *d_control_contingency_table; // device copy
     int *control_contingency_table = (int *)malloc(control_contingency_table_size);
 
-    // int chunk = 64;
-    cudaMalloc((void **)&d_combinations, num_combinations * 3 * sizeof(int));
-    cudaMemcpy(d_combinations, local_combinations, num_combinations * 3 * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMalloc((void **)&d_control_contingency_table, num_combinations * 27 * sizeof(int));
-    cudaMemset(d_control_contingency_table, 0, control_contingency_table_size);
+    int d_num_combinations = 1;
+    cudaMalloc((void **)&d_combinations, d_num_combinations * 3 * sizeof(int));
+    // cudaMemcpy(d_combinations, local_combinations, num_combinations * 3 * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&d_control_contingency_table, d_num_combinations * 27 * sizeof(int));
+    // cudaMemset(d_control_contingency_table, 0, d_num_combinations * 27 * sizeof(int));
     cudaMalloc((void **)&d_control_bit_table, snp_size * 3 * sizeof(uint64_t)); // allocate memory for control bit table device copy (only partial)
-                                                                                // cudaMemset(d_control_bit_table, 0, chunk * 27 * sizeof(int));
-    for (int i = 0; i < control_64_multiples; i++)
+    for (int c = 0; c < num_combinations; c += d_num_combinations)
     {
-        cudaMemcpy(d_control_bit_table, long_control_bit_table + i * snp_size * 3, snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
-        build_contingency_table<<<device_blks, NUM_THREADS>>>(d_control_bit_table, d_control_contingency_table, d_combinations, num_combinations);
+        int real_num_combinations = min(d_num_combinations, num_combinations - c);
+        cudaMemcpy(d_combinations, local_combinations + 3 * c, real_num_combinations * 3 * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemset(d_control_contingency_table, 0, real_num_combinations * 27 * sizeof(int));
+        for (int i = 0; i < control_64_multiples; i++)
+        {
+            cudaMemcpy(d_control_bit_table, long_control_bit_table + i * snp_size * 3, snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
+            build_contingency_table<<<device_blks, NUM_THREADS>>>(d_control_bit_table, d_control_contingency_table, d_combinations, real_num_combinations);
+        }
+        cudaMemcpy(control_contingency_table + c * 27, d_control_contingency_table, real_num_combinations * 27 * sizeof(int), cudaMemcpyDeviceToHost);
     }
-    cudaMemcpy(control_contingency_table, d_control_contingency_table, control_contingency_table_size, cudaMemcpyDeviceToHost);
+
+    // cudaMemcpy(control_contingency_table, d_control_contingency_table, control_contingency_table_size, cudaMemcpyDeviceToHost);
     cudaFree(d_control_bit_table);
     cudaFree(d_control_contingency_table);
     free(long_control_bit_table);
@@ -253,15 +260,22 @@ int main(int argc, char *argv[])
     int *d_case_contingency_table; // device copy
     int *case_contingency_table = (int *)malloc(case_contingency_table_size);
 
-    cudaMalloc((void **)&d_case_contingency_table, num_combinations * 27 * sizeof(int));
-    cudaMemset(d_case_contingency_table, 0, case_contingency_table_size);
+    cudaMalloc((void **)&d_case_contingency_table, d_num_combinations * 27 * sizeof(int));
+    // cudaMemset(d_case_contingency_table, 0, case_contingency_table_size);
     cudaMalloc((void **)&d_case_bit_table, snp_size * 3 * sizeof(uint64_t));
-    for (int i = 0; i < case_64_multiples; i++)
+    for (int c = 0; c < num_combinations; c += d_num_combinations)
     {
-        cudaMemcpy(d_case_bit_table, long_case_bit_table + i * snp_size * 3, snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
-        build_contingency_table<<<device_blks, NUM_THREADS>>>(d_case_bit_table, d_case_contingency_table, d_combinations, num_combinations);
+        int real_num_combinations = min(d_num_combinations, num_combinations - c);
+        cudaMemcpy(d_combinations, local_combinations + 3 * c, real_num_combinations * 3 * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemset(d_case_contingency_table, 0, real_num_combinations * 27 * sizeof(int));
+        for (int i = 0; i < case_64_multiples; i++)
+        {
+            cudaMemcpy(d_case_bit_table, long_case_bit_table + i * snp_size * 3, snp_size * 3 * sizeof(uint64_t), cudaMemcpyHostToDevice);
+            build_contingency_table<<<device_blks, NUM_THREADS>>>(d_case_bit_table, d_case_contingency_table, d_combinations, real_num_combinations);
+        }
+        cudaMemcpy(case_contingency_table + c * 27, d_case_contingency_table, real_num_combinations * 27 * sizeof(int), cudaMemcpyDeviceToHost);
     }
-    cudaMemcpy(case_contingency_table, d_case_contingency_table, case_contingency_table_size, cudaMemcpyDeviceToHost);
+    // cudaMemcpy(case_contingency_table, d_case_contingency_table, case_contingency_table_size, cudaMemcpyDeviceToHost);
     cudaFree(d_case_bit_table);
     cudaFree(d_case_contingency_table);
     cudaFree(d_combinations);
@@ -272,17 +286,22 @@ int main(int argc, char *argv[])
     double *scores = (double *)malloc(sizeof(double) * num_combinations); // host copy
     double *d_scores;                                                     // device copy
 
-    cudaMalloc((void **)&d_scores, sizeof(double) * num_combinations); // allocate scores device memory
-    cudaMalloc((void **)&d_control_contingency_table, num_combinations * 27 * sizeof(int));
-    cudaMalloc((void **)&d_case_contingency_table, num_combinations * 27 * sizeof(int));
+    cudaMalloc((void **)&d_scores, sizeof(double) * d_num_combinations); // allocate scores device memory
+    cudaMalloc((void **)&d_control_contingency_table, d_num_combinations * 27 * sizeof(int));
+    cudaMalloc((void **)&d_case_contingency_table, d_num_combinations * 27 * sizeof(int));
     // for (int start_idx = 0; start_idx < num_combinations; start_idx += chunk)
     //{
     //     int chunk_size = min(chunk, (num_combinations - start_idx));
-    cudaMemcpy(d_control_contingency_table, control_contingency_table, num_combinations * 27 * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_case_contingency_table, case_contingency_table, num_combinations * 27 * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemset(d_scores, 0, num_combinations * sizeof(double));
-    k2_score<<<device_blks, NUM_THREADS>>>(d_control_contingency_table, d_case_contingency_table, d_scores, num_combinations);
-    cudaMemcpy(scores, d_scores, sizeof(double) * num_combinations, cudaMemcpyDeviceToHost);
+    for (int c = 0; c < num_combinations; c += d_num_combinations)
+    {
+        int real_num_combinations = min(d_num_combinations, num_combinations - c);
+        cudaMemcpy(d_control_contingency_table, control_contingency_table + c * 27, real_num_combinations * 27 * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_case_contingency_table, case_contingency_table + c * 27, real_num_combinations * 27 * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemset(d_scores, 0, real_num_combinations * sizeof(double));
+        k2_score<<<device_blks, NUM_THREADS>>>(d_control_contingency_table, d_case_contingency_table, d_scores, real_num_combinations);
+        cudaMemcpy(scores + c, d_scores, sizeof(double) * real_num_combinations, cudaMemcpyDeviceToHost);
+    }
+
     //}
     cudaFree(d_scores);
     cudaFree(d_control_contingency_table);
