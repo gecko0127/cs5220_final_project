@@ -1,0 +1,1 @@
+/var/spool/slurmd/job25057411/slurm_script: line 9: 758997 Segmentation fault      ./gpu /pscratch/sd/y/yt634/final_project_dataset/512SNPs_2048samples.csv
