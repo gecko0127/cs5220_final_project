@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named gpu
+# Target rules for targets named mpi
 
 # Build rule for target.
-gpu: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gpu
-.PHONY : gpu
+mpi: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mpi
+.PHONY : mpi
 
 # fast build rule for target.
-gpu/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/build
-.PHONY : gpu/fast
+mpi/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/build
+.PHONY : mpi/fast
 
-main.o: main.cu.o
-.PHONY : main.o
+mpi_main.o: mpi_main.cpp.o
+.PHONY : mpi_main.o
 
 # target to build an object file
-main.cu.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/main.cu.o
-.PHONY : main.cu.o
+mpi_main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.o
+.PHONY : mpi_main.cpp.o
 
-main.i: main.cu.i
-.PHONY : main.i
+mpi_main.i: mpi_main.cpp.i
+.PHONY : mpi_main.i
 
 # target to preprocess a source file
-main.cu.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/main.cu.i
-.PHONY : main.cu.i
+mpi_main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.i
+.PHONY : mpi_main.cpp.i
 
-main.s: main.cu.s
-.PHONY : main.s
+mpi_main.s: mpi_main.cpp.s
+.PHONY : mpi_main.s
 
 # target to generate assembly for a file
-main.cu.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/main.cu.s
-.PHONY : main.cu.s
+mpi_main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.s
+.PHONY : mpi_main.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... gpu"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... mpi"
+	@echo "... mpi_main.o"
+	@echo "... mpi_main.i"
+	@echo "... mpi_main.s"
 .PHONY : help
 
 

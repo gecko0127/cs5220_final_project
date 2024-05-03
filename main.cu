@@ -53,7 +53,7 @@ __global__ void build_contingency_table(uint64_t *bit_table, uint16_t *contingen
     }
 }
 
-__global__ void k2_score(uint16_t *control_contingency_table, uint16_t *case_contingency_table, double *scores, int num_combinations)
+__global__ void k2_score(uint16_t *control_contingency_table, uint16_t *case_contingency_table, float *scores, int num_combinations)
 {
     for (int i = threadIdx.x + blockIdx.x * blockDim.x; i < num_combinations; i += blockDim.x * gridDim.x)
     {
@@ -157,14 +157,14 @@ int main(int argc, char *argv[])
     cudaFree(d_combinations);
 
     // calculate the k2 score and return the score and resulting combination
-    double *d_scores;                                                  // device copy
-    cudaMalloc((void **)&d_scores, sizeof(double) * num_combinations); // allocate scores device memory
-    cudaMemset(d_scores, 0, sizeof(double) * num_combinations);        // set scores device memory
+    float *d_scores;                                                  // device copy
+    cudaMalloc((void **)&d_scores, sizeof(float) * num_combinations); // allocate scores device memory
+    cudaMemset(d_scores, 0, sizeof(float) * num_combinations);        // set scores device memory
     k2_score<<<device_blks, NUM_THREADS>>>(d_control_contingency_table, d_case_contingency_table, d_scores, num_combinations);
     cudaFree(d_control_contingency_table);
     cudaFree(d_case_contingency_table);
-    double *scores = (double *)malloc(sizeof(double) * num_combinations); // host copy
-    cudaMemcpy(scores, d_scores, sizeof(double) * num_combinations, cudaMemcpyDeviceToHost);
+    float *scores = (float *)malloc(sizeof(float) * num_combinations); // host copy
+    cudaMemcpy(scores, d_scores, sizeof(float) * num_combinations, cudaMemcpyDeviceToHost);
     cudaFree(d_scores);
     int best_idx = 0;
     for (int i = 0; i < num_combinations; i++)

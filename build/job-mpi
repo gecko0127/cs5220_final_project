@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -N 1
+#SBATCH -N 8
 #SBATCH -C cpu
 #SBATCH -q debug
 #SBATCH -J mpitest
@@ -9,8 +9,8 @@
 #modules
 # module load openmpi
 #OpenMP settings:
-export OMP_NUM_THREADS=1
+#export OMP_NUM_THREADS=1
 
 
 #run the application:
-srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/512SNPs_2048samples.csv 3
+srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/640SNPs_2560samples.csv 3

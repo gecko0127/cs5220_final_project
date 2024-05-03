@@ -69,32 +69,29 @@ include CMakeFiles/mpi.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/mpi.dir/flags.make
 
-CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o: CMakeFiles/mpi.dir/flags.make
-CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o: ../mpi_openmp_main.cpp
-CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o: CMakeFiles/mpi.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/global/homes/y/yt634/cs5220_final_project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o"
-	/opt/cray/pe/craype/2.7.30/bin/CC $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o -MF CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o.d -o CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o -c /global/homes/y/yt634/cs5220_final_project/mpi_openmp_main.cpp
+CMakeFiles/mpi.dir/mpi_main.cpp.o: CMakeFiles/mpi.dir/flags.make
+CMakeFiles/mpi.dir/mpi_main.cpp.o: ../mpi_main.cpp
+CMakeFiles/mpi.dir/mpi_main.cpp.o: CMakeFiles/mpi.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/global/homes/y/yt634/cs5220_final_project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/mpi.dir/mpi_main.cpp.o"
+	/opt/cray/pe/craype/2.7.30/bin/CC $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/mpi.dir/mpi_main.cpp.o -MF CMakeFiles/mpi.dir/mpi_main.cpp.o.d -o CMakeFiles/mpi.dir/mpi_main.cpp.o -c /global/homes/y/yt634/cs5220_final_project/mpi_main.cpp
 
-CMakeFiles/mpi.dir/mpi_openmp_main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/mpi.dir/mpi_openmp_main.cpp.i"
-	/opt/cray/pe/craype/2.7.30/bin/CC $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /global/homes/y/yt634/cs5220_final_project/mpi_openmp_main.cpp > CMakeFiles/mpi.dir/mpi_openmp_main.cpp.i
+CMakeFiles/mpi.dir/mpi_main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/mpi.dir/mpi_main.cpp.i"
+	/opt/cray/pe/craype/2.7.30/bin/CC $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /global/homes/y/yt634/cs5220_final_project/mpi_main.cpp > CMakeFiles/mpi.dir/mpi_main.cpp.i
 
-CMakeFiles/mpi.dir/mpi_openmp_main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/mpi.dir/mpi_openmp_main.cpp.s"
-	/opt/cray/pe/craype/2.7.30/bin/CC $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /global/homes/y/yt634/cs5220_final_project/mpi_openmp_main.cpp -o CMakeFiles/mpi.dir/mpi_openmp_main.cpp.s
+CMakeFiles/mpi.dir/mpi_main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/mpi.dir/mpi_main.cpp.s"
+	/opt/cray/pe/craype/2.7.30/bin/CC $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /global/homes/y/yt634/cs5220_final_project/mpi_main.cpp -o CMakeFiles/mpi.dir/mpi_main.cpp.s
 
 # Object files for target mpi
 mpi_OBJECTS = \
-"CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o"
+"CMakeFiles/mpi.dir/mpi_main.cpp.o"
 
 # External object files for target mpi
 mpi_EXTERNAL_OBJECTS =
 
-mpi: CMakeFiles/mpi.dir/mpi_openmp_main.cpp.o
+mpi: CMakeFiles/mpi.dir/mpi_main.cpp.o
 mpi: CMakeFiles/mpi.dir/build.make
-mpi: /opt/cray/pe/libsci/23.12.5/GNU/12.3/x86_64/lib/libsci_gnu_123_mpi_mp.so
-mpi: /opt/cray/pe/libsci/23.12.5/GNU/12.3/x86_64/lib/libsci_gnu_123_mp.so
-mpi: /usr/lib64/gcc/x86_64-suse-linux/12/libgomp.so
 mpi: /opt/nvidia/hpc_sdk/Linux_x86_64/23.9/cuda/12.2/targets/x86_64-linux/lib/stubs/libcuda.so
 mpi: /opt/cray/pe/libsci/23.12.5/GNU/12.3/x86_64/lib/libsci_gnu_123_mpi.so
 mpi: /opt/cray/pe/mpich/8.1.28/ofi/gnu/12.3/lib/libmpi_gnu_123.so

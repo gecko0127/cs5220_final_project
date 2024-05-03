@@ -28,8 +28,8 @@ def generate_data_file(num_snp, num_sample):
     return file_name
 
 def main():
-    num_snp = 768
-    num_sample = 3072
+    num_snp = 640
+    num_sample = 2560
     generate_data_file(num_snp, num_sample)
     print("Data file generated successfully!")
     return 0
