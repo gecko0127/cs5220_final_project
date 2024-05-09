@@ -6,11 +6,6 @@
 #SBATCH --ntasks-per-node=64
 #SBATCH -t 00:30:00
 
-#modules
-# module load openmpi
-#OpenMP settings:
-#export OMP_NUM_THREADS=1
-
 
 #run the application:
-srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/640SNPs_2560samples.csv 3
+srun ./mpi /pscratch/sd/y/yt634/final_project_dataset/64SNPs_256samples.csv 3

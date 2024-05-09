@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named mpi
+# Target rules for targets named gpu
 
 # Build rule for target.
-mpi: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mpi
-.PHONY : mpi
+gpu: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gpu
+.PHONY : gpu
 
 # fast build rule for target.
-mpi/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/build
-.PHONY : mpi/fast
+gpu/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/build
+.PHONY : gpu/fast
 
-mpi_main.o: mpi_main.cpp.o
-.PHONY : mpi_main.o
+main.o: main.cu.o
+.PHONY : main.o
 
 # target to build an object file
-mpi_main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.o
-.PHONY : mpi_main.cpp.o
+main.cu.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/main.cu.o
+.PHONY : main.cu.o
 
-mpi_main.i: mpi_main.cpp.i
-.PHONY : mpi_main.i
+main.i: main.cu.i
+.PHONY : main.i
 
 # target to preprocess a source file
-mpi_main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.i
-.PHONY : mpi_main.cpp.i
+main.cu.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/main.cu.i
+.PHONY : main.cu.i
 
-mpi_main.s: mpi_main.cpp.s
-.PHONY : mpi_main.s
+main.s: main.cu.s
+.PHONY : main.s
 
 # target to generate assembly for a file
-mpi_main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mpi.dir/build.make CMakeFiles/mpi.dir/mpi_main.cpp.s
-.PHONY : mpi_main.cpp.s
+main.cu.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu.dir/build.make CMakeFiles/gpu.dir/main.cu.s
+.PHONY : main.cu.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... mpi"
-	@echo "... mpi_main.o"
-	@echo "... mpi_main.i"
-	@echo "... mpi_main.s"
+	@echo "... gpu"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
 .PHONY : help
 
 

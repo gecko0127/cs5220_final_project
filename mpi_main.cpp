@@ -171,7 +171,6 @@ int main(int argc, char *argv[])
     // Init MPI
     // num_procs is the total number of ranks in execution
     // rank is the rank number of current rank
-    auto start_time = std::chrono::steady_clock::now();
     int num_procs, rank;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
@@ -264,6 +263,7 @@ int main(int argc, char *argv[])
         cout << "-----------------------------------------------" << endl;
         cout << endl;
     }
+    auto start_time = std::chrono::steady_clock::now();
 
     // generate 3 order combinations (each row is a combination)
     vector<vector<int>> combinations;

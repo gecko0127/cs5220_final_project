@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     int numSM;
     cudaDeviceGetAttribute(&numSM, cudaDevAttrMultiProcessorCount, devId);
     int device_blks = 32 * numSM;
-
+    auto start_time = std::chrono::steady_clock::now();
     uint16_t control_size = atoi(argv[2]), case_size = atoi(argv[2]);
     uint8_t control_64_multiples = ceil(control_size * 1.0 / 64), case_64_multiples = ceil(case_size * 1.0 / 64);
     uint16_t snp_size = atoi(argv[3]);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
         }
     }
     fin.close();
-    auto start_time = std::chrono::steady_clock::now();
+    //auto start_time = std::chrono::steady_clock::now();
 
     uint16_t *combinations = (uint16_t *)malloc(num_combinations * 3 * sizeof(uint16_t));
     generate_combinations(combinations, snp_size);
