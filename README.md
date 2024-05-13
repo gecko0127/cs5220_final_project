@@ -4,7 +4,7 @@
 
 ### Data
 
-The datasets used in this project are in the `dataset` folder. The data files are generated with the `data_generator.py` due to the confidentiality issue of getting the real data.
+The datasets used in this project are in the [dataset](https://github.com/gecko0127/cs5220_final_project/tree/master/dataset) folder. The data files are generated with the [data_generator.py](https://github.com/gecko0127/cs5220_final_project/blob/master/data_generator.py) due to the confidentiality issue of getting the real data.
 
 ### Implementation
 
