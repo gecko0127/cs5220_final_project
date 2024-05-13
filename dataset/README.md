@@ -7,4 +7,5 @@
     - `128SNPs_512samples.csv`
     - `256SNPs_1024samples.csv`
     - `512SNPs_2048samples.csv`
+    - `640SNPs_2560samples.csv`
     - `1024SNPs_4096samples.csv`
