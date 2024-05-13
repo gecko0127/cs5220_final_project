@@ -28,7 +28,7 @@
     - data representation: `vector<vector<char>>`
 - combinations: `combinations`
     - dimension: (number of possible combinations (snp_size choose 3)) * 3
-    - data representation: `vector<vector<char>>`
+    - data representation: `vector<vector<int>>`
 - bit table: `control_bit_table`, `case_bit_table`
     - dimension: (number of snps) * (number of genotype per snp (3)) * (number of 64 multiple in the sample (ceiling))
     - data representation: `vector<vector<vector<bitset<64>>>>`
