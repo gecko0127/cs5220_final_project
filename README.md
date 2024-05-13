@@ -10,7 +10,7 @@ The datasets used in this project are in the `dataset` folder. The data files ar
 
 Here is a list of implementations discussed in the report. The original copy and implementation history can be found in the link at the end of each implementation method.
 
-- Serial Implementation: `serial.cpp` ([master/serial.cpp]())
+- Serial Implementation: `serial.cpp` ([master/serial.cpp](https://github.com/gecko0127/cs5220_final_project/blob/master/serial.cpp))
 - OpenMP Implementation: `openmp.cpp` ([ezgi/cs5220_final_project/openmp.cpp](https://github.com/gecko0127/cs5220_final_project/blob/ezgi/cs5220_final_project/openmp.cpp))
 - MPI Implementation: `mpi_main.cpp` ([yiwent/mpi_main.cpp](https://github.com/gecko0127/cs5220_final_project/blob/yiwent/mpi_main.cpp))
 - Hybrid Implementation: `mpi_openmp_main.cpp` ([yiwent/mpi_openmp_main.cpp](https://github.com/gecko0127/cs5220_final_project/blob/yiwent/mpi_openmp_main.cpp))
