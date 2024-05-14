@@ -65,7 +65,6 @@ void build_2nd_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, 
     // 3 * 3 * (num_sample_bit_set)
     vector<vector<vector<bitset<64>>>> temp(3, vector<vector<bitset<64>>>(3, vector<bitset<64>>(num_sample_bit_set, 0)));
 
-    // TODO: the implicit dependency of temp; try to use reduce on count if possible
 #pragma omp parallel for
     for (int i = 0; i < combinations.size(); i++)
     {
@@ -95,7 +94,6 @@ void build_2nd_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, 
 void build_3rd_contingency_table(vector<vector<vector<bitset<64>>>> &bit_table, vector<vector<int>> &contingency_table, vector<vector<int>> &combinations, int size, int snp_size)
 {
     int num_biset = bit_table[0][0].size();
-// TODO: use reduce or private to collapse 3 levels
 #pragma omp parallel for collapse(2)
     for (int i = 0; i < combinations.size(); i++)
     {
@@ -138,11 +136,9 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
     double k2 = DBL_MAX;
     vector<int> final_snp;
     vector<double> scores(combinations.size(), 0);
-    // int best = 0;
 #pragma omp parallel for
     for (int i = 0; i < combinations.size(); i++)
     {
-        // double score = 0;
         for (int idx = 0; idx < 27; idx++)
         {
             int case_count = case_contingency_table[i][idx];
