@@ -16,7 +16,6 @@ using namespace std;
 // generate 3 order combinations
 void generate_3rd_combinations(vector<vector<int>> &combinations, int snp_size)
 {
-    #pragma omp single
     for (int i = 0; i < snp_size - 2; i++)
     {   
         for (int j = i + 1; j < snp_size - 1; j++)
@@ -115,9 +114,8 @@ pair<vector<int>, double> k2_score(vector<vector<int>> &control_contingency_tabl
 int main(int argc, char *argv[])
 {
 
-    omp_set_num_threads(1);
+    omp_set_num_threads(64);
 
-    auto start_time = std::chrono::steady_clock::now();
     int control_size = 0; // the number of control sample
     int case_size = 0;    // the number of case sample
     int snp_size = 0;     // the number of snp
@@ -199,6 +197,8 @@ int main(int argc, char *argv[])
         cout << "-----------------------------------------------" << endl;
         cout << endl;
     }
+
+    auto start_time = std::chrono::steady_clock::now();
 
     // generate 3 order combinations (each row is a combination)
     vector<vector<int>> combinations;
